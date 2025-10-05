@@ -1,20 +1,24 @@
-// socket.js
 import { Server } from "socket.io";
 
 const userSocketMap = {};
-let io; // 👈 make io accessible globally within this module
+let io; // Will hold the Socket.IO server instance
 
-// Get socket ID of a user by userId
+// Returns socket ID for a given userId
 export const getReceiverSocketId = (receiverId) => userSocketMap[receiverId];
 
-// Get the initialized io instance (to use in controllers)
-export const getIO = () => io;
+// Returns the initialized io instance (to use in other modules/controllers)
+export const getIO = () => {
+  if (!io) {
+    throw new Error("Socket.io not initialized! Call setupSocket first.");
+  }
+  return io;
+};
 
-// Setup Socket.IO on the provided HTTP server
+// Initialize Socket.IO on the HTTP server
 export const setupSocket = (server) => {
   io = new Server(server, {
     cors: {
-      origin: "http://localhost:5173", // 🔁 update for production if needed
+      origin: "http://localhost:5173", // Adjust this in production
       methods: ["GET", "POST"],
     },
   });
@@ -27,7 +31,7 @@ export const setupSocket = (server) => {
       console.log(`✅ User connected: userId = ${userId}, socketId = ${socket.id}`);
     }
 
-    // Send the updated list of online users to everyone
+    // Notify everyone about current online users
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
     socket.on("disconnect", () => {
