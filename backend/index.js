@@ -11,15 +11,15 @@ import connectDB from "./utils/db.js";
 import userRoute from "./routes/user.route.js";
 import postRoute from "./routes/post.route.js";
 import messageRoute from "./routes/message.route.js";
-import { setupSocket } from "./socket/socket.js"; // ✅ FIX: Import setupSocket only
+import { setupSocket } from "./socket/socket.js"; // Import only setupSocket
 
 dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
-setupSocket(server); // ✅ Initialize socket.io on server
+setupSocket(server); // Initialize socket.io on server
 
-// For __dirname compatibility in ES module
+// For __dirname compatibility in ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -29,7 +29,7 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 const corsOptions = {
-  origin: "http://localhost:5173", // 🔁 Change this for production
+  origin: "http://localhost:5173", // Change for production if needed
   credentials: true,
 };
 app.use(cors(corsOptions));
@@ -39,9 +39,11 @@ app.use("/api/v1/user", userRoute);
 app.use("/api/v1/post", postRoute);
 app.use("/api/v1/message", messageRoute);
 
-// Serve frontend
+// Serve frontend static files
 app.use(express.static(path.join(__dirname, "frontend", "dist")));
-app.get("*", (req, res) => {
+
+// Fix: Use "/*" instead of "*" for wildcard routes
+app.get("/*", (req, res) => {
   res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"));
 });
 
